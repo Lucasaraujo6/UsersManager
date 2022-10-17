@@ -1,34 +1,43 @@
 // import { urlInput } from '../models/url.model';
+import { NextFunction } from "express";
+
 import crypto from "crypto";
 // import knex from "../database";
 import config from "config";
-import { getUrlObject, insertUrl } from "../repository/url.repository";
+import { insertUser } from "../repository/url.repository";
+import { IRegister, IUser } from "../models/users.model";
 
 const port = config.get<number>("port");
 const host = config.get<string>("host");
 
 export async function getUrl(input: string) {
   try {
-    return await getUrlObject(input);
+    // return await getUrlObject(input);
   } catch (e) {
     throw e;
   }
 }
 
-export async function createUrl(url: string) {
-  // urlFile();
-
+export async function createUser(registerInfos: IRegister) {
   try {
-    const shorter = createShort();
+    if (registerInfos.password !== registerInfos.passwordConfirmation) {
+      throw new Error("Senhas diferentes");
+    }
 
-    await insertUrl(url, shorter);
+    delete registerInfos.passwordConfirmation;
 
-    return `http://${host}:${port}/${shorter}`;
-  } catch (e) {
-    throw e;
+    const token = createToken();
+    const allInfos: IUser = { ...registerInfos, ...{ token } };
+    await insertUser(allInfos);
+
+    return token;
+  } catch (e: any) {
+    e.status = 404;
+    e.statusCode = 404;
+    return { e };
   }
 }
 
-const createShort = () => {
-  return crypto.randomBytes(3).toString("hex");
+const createToken = () => {
+  return crypto.randomUUID();
 };
