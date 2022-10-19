@@ -1,43 +1,86 @@
-// import { urlInput } from '../models/url.model';
-import { NextFunction } from "express";
-
-import crypto from "crypto";
-// import knex from "../database";
 import config from "config";
-import { insertUser } from "../repository/url.repository";
-import { IRegister, IUser } from "../models/users.model";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { insertUser, getUser } from "../repository/url.repository";
+import {
+  IRegister,
+  IUser,
+  createUserSchema,
+  ILogin,
+  userLoginSchema,
+} from "../models/users.model";
 
-const port = config.get<number>("port");
-const host = config.get<string>("host");
-
-export async function getUrl(input: string) {
+export async function createUser(registerInfos: IRegister) {
   try {
-    // return await getUrlObject(input);
+    registerInfos.password = await bcrypt.hash(registerInfos.password, 8);
+    delete registerInfos.confirmPassword;
+    const allInfos: IUser = registerInfos;
+
+    const insert = await insertUser(allInfos);
+    if (!(insert instanceof Array)) {
+      throw insert;
+    }
+    const token = getToken(registerInfos);
+    console.log({ token });
+    return token;
+  } catch (e: any) {
+    return e;
+  }
+}
+export async function loginUser(data: ILogin) {
+  try {
+    const userData = await getUser(data);
+    if (userData instanceof Array) {
+      if (userData.length === 0) {
+        return;
+      }
+      const compare = await bcrypt.compare(data.password, userData[0].password);
+      if (compare) {
+        const token = getToken(data);
+        return token;
+      } else {
+        return;
+      }
+    }
+  } catch (e: any) {
+    return e;
+  }
+}
+
+export function decode(token: string) {
+  try {
+    console.log(jwt.verify(token, config.get<string>("secret")));
+    return 1;
+  } catch (e) {
+    throw e;
+  }
+}
+export async function getToken(loginData: ILogin) {
+  try {
+    return jwt.sign({ id: loginData.email }, config.get<string>("secret"), {
+      expiresIn: config.get<string>("expiresIn"),
+    });
   } catch (e) {
     throw e;
   }
 }
 
-export async function createUser(registerInfos: IRegister) {
-  try {
-    if (registerInfos.password !== registerInfos.passwordConfirmation) {
-      throw new Error("Senhas diferentes");
-    }
+export async function validateNewUser(data: IRegister) {
+  let isValid = false;
 
-    delete registerInfos.passwordConfirmation;
+  await createUserSchema.isValid(data).then((valid) => {
+    isValid = valid;
+  });
 
-    const token = createToken();
-    const allInfos: IUser = { ...registerInfos, ...{ token } };
-    await insertUser(allInfos);
-
-    return token;
-  } catch (e: any) {
-    e.status = 404;
-    e.statusCode = 404;
-    return { e };
-  }
+  return isValid;
 }
 
-const createToken = () => {
-  return crypto.randomUUID();
-};
+export async function validateUserLoginData(data: ILogin) {
+  let isValid = false;
+
+  await userLoginSchema.isValid(data).then((valid) => {
+    isValid = valid;
+  });
+
+  return isValid;
+}

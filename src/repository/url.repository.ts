@@ -1,5 +1,5 @@
 import knex from "../database";
-import { IUser } from "../models/users.model";
+import { ILogin, IUser } from "../models/users.model";
 
 // export async function getUrlObject(input: string) {
 //   try {
@@ -12,14 +12,25 @@ import { IUser } from "../models/users.model";
 // }
 
 export async function insertUser(newUser: IUser) {
-  // try {
-  return await knex("users").insert({
-    name: newUser.name,
-    email: newUser.email,
-    password: newUser.password,
-    token: newUser.token,
-  });
-  // } catch (e) {
-  //   throw e;
-  // }
+  try {
+    const test = await knex("users").insert({
+      name: newUser.name,
+      email: newUser.email,
+      password: newUser.password,
+    });
+    return test;
+  } catch (e) {
+    return e;
+  }
+}
+export async function getUser(data: ILogin) {
+  try {
+    const test = await knex("users")
+      .select("email", "password")
+      .where({ email: data.email });
+    console.log(test);
+    return test;
+  } catch (e) {
+    return e;
+  }
 }

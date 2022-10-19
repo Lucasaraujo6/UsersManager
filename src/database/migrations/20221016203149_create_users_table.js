@@ -13,7 +13,6 @@ exports.up = (knex) =>
     table.string("name", 320);
     table.string("email", 320).unique().notNullable();
     table.string("password", 8);
-    table.string("token", 320).unique().notNullable();
 
     table.timestamps(true, true);
   });

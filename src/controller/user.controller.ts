@@ -1,48 +1,59 @@
 import { NextFunction, Request, Response } from "express";
-import { IRegister } from "../models/users.model";
 
-import { createUser, getUrl } from "../service/url.service";
-import log from "../utils/logger";
+import { ILogin, IRegister } from "../models/users.model";
+
+import {
+  createUser,
+  loginUser,
+  getToken,
+  validateNewUser,
+  validateUserLoginData,
+  decode,
+} from "../service/url.service";
 
 export async function create(req: Request, res: Response, next: NextFunction) {
   try {
     const registerInfos: IRegister = req.body;
-    const token = await createUser(registerInfos);
 
-    if (token instanceof String) {
-      return res.send(token).status(202);
+    const valid = await validateNewUser(registerInfos);
+    if (!valid) {
+      return next({ errno: 1 });
     }
-    return next({ message:"Usuário já cadastrado", status: 409 })
+
+    const token = await createUser(registerInfos);
+    if (token instanceof String) return res.send(token).status(202);
+
+    throw token;
   } catch (e: any) {
-    return next({ message: e.message, status: 500 });
+    return next(e);
   }
 }
 
-export async function get(req: Request, res: Response, next: NextFunction) {
+export async function login(req: Request, res: Response, next: NextFunction) {
   try {
-    const urlId = req.params.urlId;
+    const loginData: ILogin = req.body;
 
-    // const url = await getUrl(urlId);
-    // if (!url) {
-    //   throw new Error("Erro na url");
-    // }
+    const valid = await validateUserLoginData(loginData);
+    if (!valid) {
+      return next({ errno: 1 });
+    }
 
-    return res.redirect("url.url");
-  } catch (e) {
-    // const error = new Error(e);
-    // Error.httpStatusCode = 500;
-    return next({ e, status: 400 });
-    // log.error(e);
+    const token = await loginUser(loginData);
+    if (token) {
+      return res.send({ message: "Success", token }).status(202);
+    }
+    return next({ errno: 2 });
+  } catch (e: any) {
+    return next(e);
   }
 }
 
-export async function handleError(
-  err: any,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) {
-  res.status(err.status).send(err.message);
+export async function profile(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.send({ message: "Logadão" }).status(200);
+  } catch (e: any) {
+    return next(e);
+  }
 }
 
 // REFERÊNCIAS

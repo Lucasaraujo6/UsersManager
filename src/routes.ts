@@ -1,14 +1,19 @@
 import { Express } from "express";
 
-import { create, get, handleError } from "./controller/user.controller";
+import { create, login, profile } from "./controller/user.controller";
+import { AuthHandler } from "./middlewares/AuthHandler";
+import { ErrorHandler } from "./middlewares/ErrorHandler";
 
 const routes = (app: Express) => {
   app
     //URLS
-    .post("/api", create)
+    .post("/api/signup", create)
+    .post("/api/signin", login)
+    .use(AuthHandler)
+    .get("/api/profile", profile)
     // .use(treatError);
 
-    .use(handleError);
+    .use(ErrorHandler);
 };
 
 export default routes;
