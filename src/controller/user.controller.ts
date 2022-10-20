@@ -5,10 +5,8 @@ import { ILogin, IRegister } from "../models/users.model";
 import {
   createUser,
   loginUser,
-  getToken,
   validateNewUser,
   validateUserLoginData,
-  decode,
 } from "../service/url.service";
 
 export async function create(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +19,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
     }
 
     const token = await createUser(registerInfos);
-    if (token instanceof String) return res.send(token).status(202);
+    if (token.token) return res.send(token.token).status(202);
 
     throw token;
   } catch (e: any) {

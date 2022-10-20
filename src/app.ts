@@ -6,11 +6,20 @@ import config from "config";
 const port = config.get<number>("port");
 const host = config.get<string>("host");
 const app = express();
+
 app.use(express.json());
-// app.use("/", routes)
 app.use(express.urlencoded({ extended: false }));
+
+// app.listen(port, host, () => {
+//   log.info(`[server]: listening at http://${host}:${port}`);
+//   routes(app);
+// });
+
+app.use(express.json());
+app.use(routes);
 
 app.listen(port, host, () => {
   log.info(`[server]: listening at http://${host}:${port}`);
-  routes(app);
 });
+
+export default app;

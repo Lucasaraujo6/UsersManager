@@ -28,7 +28,6 @@ export async function getUser(data: ILogin) {
     const test = await knex("users")
       .select("email", "password")
       .where({ email: data.email });
-    console.log(test);
     return test;
   } catch (e) {
     return e;

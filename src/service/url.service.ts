@@ -21,8 +21,8 @@ export async function createUser(registerInfos: IRegister) {
       throw insert;
     }
     const token = getToken(registerInfos);
-    console.log({ token });
-    return token;
+
+    return { token };
   } catch (e: any) {
     return e;
   }
@@ -37,6 +37,7 @@ export async function loginUser(data: ILogin) {
       const compare = await bcrypt.compare(data.password, userData[0].password);
       if (compare) {
         const token = getToken(data);
+        console.log(token);
         return token;
       } else {
         return;
@@ -49,7 +50,7 @@ export async function loginUser(data: ILogin) {
 
 export function decode(token: string) {
   try {
-    console.log(jwt.verify(token, config.get<string>("secret")));
+    // console.log(jwt.verify(token, config.get<string>("secret")));
     return 1;
   } catch (e) {
     throw e;

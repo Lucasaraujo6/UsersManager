@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import config from "config";
-import { ErrorHandler } from "./ErrorHandler";
 
 export async function AuthHandler(
   req: Request,
@@ -9,6 +8,7 @@ export async function AuthHandler(
   next: NextFunction
 ) {
   try {
+    // console.log(req.headers);
     const auth = req.headers.authorization;
     if (!auth) {
       return next({ errno: 3 });
