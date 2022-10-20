@@ -1,10 +1,10 @@
 // import { describe, expect, test } from "@jest/globals";
 import request from "supertest";
-import app from "../app";
+import app from "../src/app";
 
 const newUserData = {
   name: "astrina",
-  email: "aavd3rfddd332ds2dingass@gmail.com",
+  email: "aavd3rfddd332dsa2dingass@gmail.com",
   password: "0stringS",
   confirmPassword: "0stringS",
 };

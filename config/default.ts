@@ -3,4 +3,5 @@ export default {
   host: "localhost",
   secret: "dmkjancvksdjbnfmnxjwqi21u3987mx*(&rqmjwh21!@#",
   expiresIn: "24h",
+  test: "user.test.ts",
 };
